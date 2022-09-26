@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "request": "^2.88.2"
+  },
+  "name": "elitecrontabbedscripts",
+  "version": "0.0.2",
+  "description": "collection of crontab-bound scripts for automated reporting of stuff for Elite: Dangerous",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rglx/EliteCrontabbedScripts.git"
+  },
+  "keywords": [
+    "elite",
+    "dangerous",
+    "crontab",
+    "scripts"
+  ],
+  "author": "rglx",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/rglx/EliteCrontabbedScripts/issues"
+  },
+  "homepage": "https://github.com/rglx/EliteCrontabbedScripts#readme"
+}

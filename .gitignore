@@ -1,3 +1,6 @@
+# crontab scripts that are full of webhook token stuff
+*-crontab.sh
+
 # Logs
 logs
 *.log

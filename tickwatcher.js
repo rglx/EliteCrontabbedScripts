@@ -16,14 +16,12 @@ console.log('loading dependencies')
 const fs = require('fs'); // Built-in to nodejs
 const path = require('path'); // Built-in to nodejs
 const request = require('request'); // Install using npm
+const package = require('./package.json')
 
 webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken + "?wait=true&thread_id=" + webhookThreadId
 tickDataUrl = "/ebgs/v5/ticks"
 console.log("webhook url: " + webhookUrl)
 
-const softwareName = "galaxy tick watcher"
-const softwareAuthor = "CMDR rglx"
-const softwareVersion = "0.0.2"
 const outgoingEmbeds = []
 
 
@@ -49,7 +47,7 @@ function retrieveApiResultFromEliteBgsApp (apiEndpoint, callback) {
 	try {
 		request.get( {
 			url: destinationUrl + apiEndpoint, 
-			headers: { 'User-Agent': softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor },
+			headers: { 'User-Agent': package.description + " - tick watcher" + ' v' + package.version + ' by ' + package.author },
 			timeout: 30000
 		}, ( error, response, body ) => {
 			if ( error ) {
@@ -80,7 +78,7 @@ function postToDiscordViaWebhook( embedsToSend, callback ) {
 		request.post( {
 			url: webhookUrl,
 			headers: {
-				'User-Agent': softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor,
+				'User-Agent': package.description + " - tick watcher" + ' v' + package.version + ' by ' + package.author,
 				"Content-Type": "application/json"
 			},
 			timeout: 3000,

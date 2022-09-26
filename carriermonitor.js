@@ -28,6 +28,7 @@ console.log('loading dependencies')
 const fs = require('fs'); // Built-in to nodejs
 const path = require('path'); // Built-in to nodejs
 const request = require('request'); // Install using npm
+const package = require('./package.json')
 
 webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken +"?wait=true&thread_id=" + webhookThreadId + "&name=" + webhookNickname
 console.log("webhook url: " + webhookUrl)
@@ -35,9 +36,6 @@ console.log("squadron id: " + squadronId)
 
 // important variables - dont change these
 const carrierListTableRowRegexp = /<tr><td class="lineright wrap">(?:<a href="(\/elite\/cmdr-fleetcarrier\/\d+\/\d+\/)">)?(.*?) <span class="minor">\((.*?)\)<\/span>(?:<\/a>)?<\/td><td class="lineright wrap"><a href="(\/elite\/starsystem\/\d*\/?)">(.*?)<\/a><\/td><td class="wrap"><a href="(\/elite\/cmdr\/\d+\/)">(.*?)<\/a><\/td><\/tr>/ig // splits table cells out
-const softwareName = "inara squadron carrier monitor"
-const softwareAuthor = "CMDR rglx"
-const softwareVersion = "0.0.2"
 const outgoingEmbeds = []
 
 
@@ -63,7 +61,7 @@ function getInaraPageAnonymously( page, callback ) { // Grab a whole page's HTML
 	try {
 		request.get( {
 			url: 'https://inara.cz/' + page, 
-			headers: { 'User-Agent': softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor },
+			headers: { 'User-Agent': package.description + " - carrier monitor" + ' v' + package.version + ' by ' + package.author },
 			timeout: 30000
 		}, ( error, response, body ) => {
 			if ( error ) {
@@ -93,7 +91,7 @@ function postToDiscordViaWebhook( embedsToSend, callback ) {
 		request.post( {
 			url: webhookUrl,
 			headers: {
-				'User-Agent': softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor,
+				'User-Agent': package.description + " - carrier monitor" + ' v' + package.version + ' by ' + package.author,
 				"Content-Type": "application/json"
 			},
 			timeout: 3000,
