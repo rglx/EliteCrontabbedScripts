@@ -1,28 +1,29 @@
 
-if (process.argv.length != 4) {
+if (process.argv.length != 5) {
 	console.error("ERROR: wrong number of arguments given.")
-	console.error("usage: "+ process.argv[0] + " " + process.argv[1] + " <discord webhook ID> <discord webhook token>")
+	console.error("usage: "+ process.argv[0] + " " + process.argv[1] + " <discord webhook ID> <discord webhook token> <discord thread ID>")
 	console.error("  Discord webhook ID is the first number on your webhook URL. typically about 16-20 numbers long.")
 	console.error("  Discord webhook token is everything after the last / in the webhook URL. wrap in quotes.")
+	console.error("  Discord thread ID is the thread ID you want to send to. specifying 0 should also work.")
 	process.exit(255)
 }
 
 const webhookId = process.argv[2]
 const webhookToken = process.argv[3]
-
+const webhookThreadId = process.argv[4]
 
 console.log('loading dependencies')
 const fs = require('fs'); // Built-in to nodejs
 const path = require('path'); // Built-in to nodejs
 const request = require('request'); // Install using npm
 
-webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken
+webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken + "?wait=true&thread_id=" + webhookThreadId
 tickDataUrl = "/ebgs/v5/ticks"
 console.log("webhook url: " + webhookUrl)
 
 const softwareName = "galaxy tick watcher"
 const softwareAuthor = "CMDR rglx"
-const softwareVersion = "0.0.1"
+const softwareVersion = "0.0.2"
 const outgoingEmbeds = []
 
 
