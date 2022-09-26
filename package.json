@@ -4,7 +4,7 @@
   },
   "name": "elitecrontabbedscripts",
   "version": "0.0.2",
-  "description": "collection of crontab-bound scripts for automated reporting of stuff for Elite: Dangerous",
+  "description": "EliteCrontabbedScripts",
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
@@ -20,7 +20,7 @@
     "crontab",
     "scripts"
   ],
-  "author": "rglx",
+  "author": "CMDR rglx",
   "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/rglx/EliteCrontabbedScripts/issues"
