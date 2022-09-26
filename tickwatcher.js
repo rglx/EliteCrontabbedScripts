@@ -158,7 +158,7 @@ retrieveApiResultFromEliteBgsApp(tickDataUrl, apiResult => {
 		timestamp,
 		description: "*[ inexplicable message ]*\n\nyou ... probably shouldn't be seeing this. contact rglx and let her know.",
 	}
-	newEmbedToSend["description"] = "**__Occurred at:__**\n "+new Date(ticktimestamp)+"\n\n*(approximately " + differenceInMinutes + " minutes ago)*"
+	newEmbedToSend["description"] = "**__Occurred at:__**\n "+new Date(ticktimestamp)+"\n\n*(<t:"+Math.floor(tickTime.getTime() / 1000)+":R>)*"
 	if (sendEmbed) {
 		console.log(newEmbedToSend)
 		postToDiscordViaWebhook([newEmbedToSend], webhookResult => { if (webhookResult) {writeLog("Something happened, API result below: ","Discord API");console.error(webhookResult)} })
