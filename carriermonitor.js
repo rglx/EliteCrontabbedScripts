@@ -8,9 +8,9 @@
 
 //  CONFIGURATION
 
-if (process.argv.length != 5) {
+if (process.argv.length != 7) {
 	console.error("ERROR: wrong number of arguments given.")
-	console.error("usage: "+ process.argv[0] + " " + process.argv[1] + " <inara squadron ID> <discord webhook ID> <discord webhook token>")
+	console.error("usage: "+ process.argv[0] + " " + process.argv[1] + " <inara squadron ID> <discord webhook ID> <discord webhook token> <discord thread ID> <discord webhook nickname>")
 	console.error("  INARA squadron ID is the number in the URL of your squadron's page.")
 	console.error("  Discord webhook ID is the first number on your webhook URL. typically about 16-20 numbers long.")
 	console.error("  Discord webhook token is everything after the last / in the webhook URL. wrap in quotes.")
@@ -20,6 +20,8 @@ if (process.argv.length != 5) {
 const squadronId = process.argv[2]
 const webhookId = process.argv[3]
 const webhookToken = process.argv[4]
+const webhookThreadId = process.argv[5]
+const webhookNickname = process.argv[6]
 
 
 console.log('loading dependencies')
@@ -27,15 +29,15 @@ const fs = require('fs'); // Built-in to nodejs
 const path = require('path'); // Built-in to nodejs
 const request = require('request'); // Install using npm
 
-webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken
+webhookUrl = "https://discord.com/api/webhooks/" + webhookId + "/" + webhookToken +"?wait=true&thread_id=" + webhookThreadId + "&name=" + webhookNickname
 console.log("webhook url: " + webhookUrl)
 console.log("squadron id: " + squadronId)
 
 // important variables - dont change these
-const carrierListTableRowRegexp = /<tr><td.*?>(?:<a.*?>)*(.*?) <span.*?>\((.*?)\)<\/span>(?:<\/a>)*<\/td><td.*?><a href="(.*?)">(.*?)<\/a><\/td><td.*?><a href="(.*?)" class="inverse">(.*?)<\/a><\/td><\/tr>/gi // splits table cells out
+const carrierListTableRowRegexp = /<tr><td class="lineright wrap">(?:<a href="(\/elite\/cmdr-fleetcarrier\/\d+\/\d+\/)">)?(.*?) <span class="minor">\((.*?)\)<\/span>(?:<\/a>)?<\/td><td class="lineright wrap"><a href="(\/elite\/starsystem\/\d*\/?)">(.*?)<\/a><\/td><td class="wrap"><a href="(\/elite\/cmdr\/\d+\/)">(.*?)<\/a><\/td><\/tr>/ig // splits table cells out
 const softwareName = "inara squadron carrier monitor"
 const softwareAuthor = "CMDR rglx"
-const softwareVersion = "0.0.1"
+const softwareVersion = "0.0.2"
 const outgoingEmbeds = []
 
 
@@ -117,13 +119,15 @@ function postToDiscordViaWebhook( embedsToSend, callback ) {
 }
 function parseInaraSquadronCarrierListing(pageText) {
 	const carrierListing = {}
-	pageText.replace(carrierListTableRowRegexp, (match, carrierName, carrierIdent, carrierLocationId, carrierLocation, carrierOwnerId, carrierOwner) => 
+	pageText.replace(carrierListTableRowRegexp, (match, carrierPage, carrierName, carrierIdent, carrierLocationId, carrierLocation, carrierOwnerId, carrierOwner) => 
 			carrierListing[carrierIdent] = {
-				"name": carrierName,
-				"location": carrierLocation,
-				"locationId": carrierLocationId,
-				"owner": carrierOwner,
-				"ownerId": carrierOwnerId
+				name: carrierName,
+				location: carrierLocation,
+				locationId: carrierLocationId,
+				owner: carrierOwner,
+				ownerId: carrierOwnerId,
+				carrierPage: carrierPage,
+				stationPage: "/elite/station/?search=" + carrierIdent
 			}
 		)
 	return carrierListing
@@ -132,7 +136,7 @@ function loadCachedCarrierListing(squadronId,webhookId){
 	writeLog("Loading cached carrier listing from file...","Cache")
 	cacheData = {}
 	try {
-		let rawCacheData = fs.readFileSync("./cache/carriers-"+squadronId+"-"+webhookId+".json")
+		let rawCacheData = fs.readFileSync("./cache/carriers-"+squadronId+".json")
 		cacheData = JSON.parse(rawCacheData)
 		writeLog("Loaded cache ok","Cache")
 	} catch(error) {
@@ -145,7 +149,7 @@ function loadCachedCarrierListing(squadronId,webhookId){
 function saveCachedCarrierListing(squadronId,webhookId,carrierListing) {
 	cacheToWrite = JSON.stringify(carrierListing)
 	try {
-		fs.writeFileSync("./cache/carriers-"+squadronId+"-"+webhookId+".json",cacheToWrite)
+		fs.writeFileSync("./cache/carriers-"+squadronId+".json",cacheToWrite)
 	} catch (error) {
 		writeLog("COULD NOT WRITE CACHE FILE!\n\t"+error,"CACHE ERROR")
 	}
@@ -159,6 +163,7 @@ function findChangedCarrierLocations(currentCarrierListing, lastCarrierListing){
 		const newEmbedToSend = {
 			title: "Fleet Carrier *" +currentCarrierListing[carrier]["name"] + "*  (" +carrier+ ")",
 			timestamp,
+			color: 0x57D168,
 			description: "*[ inexplicable carrier appearance ]*\n\nyou ... probably shouldn't be seeing this. contact rglx and let her know.",
 		}
 		if ( lastCarrierListing[carrier] === undefined ) {
@@ -186,7 +191,7 @@ function findChangedCarrierLocations(currentCarrierListing, lastCarrierListing){
 
 writeLog(softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor +', starting up...',"Initialization")
 
-currentCarrierListing = getInaraPageAnonymously("/squadron-fleet-carriers/"+squadronId+"/", inaraPageText => {
+currentCarrierListing = getInaraPageAnonymously("/elite/squadron-assets/?param1="+squadronId+"", inaraPageText => {
 
 	currentCarrierListing = parseInaraSquadronCarrierListing(inaraPageText)
 	lastCarrierListing = loadCachedCarrierListing(squadronId,webhookId)
