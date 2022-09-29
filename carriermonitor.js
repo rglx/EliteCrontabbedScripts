@@ -187,7 +187,7 @@ function findChangedCarrierLocations(currentCarrierListing, lastCarrierListing){
 
 }
 
-writeLog(softwareName + ' v' + softwareVersion + ' by ' + softwareAuthor +', starting up...',"Initialization")
+writeLog(package.description + " - carrier monitor" + ' v' + package.version + ' by ' + package.author +', starting up...',"Initialization")
 
 currentCarrierListing = getInaraPageAnonymously("/elite/squadron-assets/?param1="+squadronId+"", inaraPageText => {
 
@@ -195,7 +195,7 @@ currentCarrierListing = getInaraPageAnonymously("/elite/squadron-assets/?param1=
 	lastCarrierListing = loadCachedCarrierListing(squadronId,webhookId)
 	saveCachedCarrierListing(squadronId,webhookId,currentCarrierListing)
 	findChangedCarrierLocations(currentCarrierListing,lastCarrierListing)
-	console.log(outgoingEmbeds.length)
+	console.log("outbound embeds: "+ outgoingEmbeds.length)
 	if (outgoingEmbeds.length == 0) {
 		writeLog("no outgoing messages for discord. skipping this time.","Discord API")	
 	} else if ( outgoingEmbeds.length < 11 ) {
@@ -205,7 +205,9 @@ currentCarrierListing = getInaraPageAnonymously("/elite/squadron-assets/?param1=
 		// have to split into multiple messages...
 		for (let counter = 0; counter < outgoingEmbeds.length; counter=counter+10) {
 			writeLog("sending batch of ten embeds starting with the "+counter+"th one...","Discord API")
-			postToDiscordViaWebhook(outgoingEmbeds.slice(counter,counter+10), webhookResult => { if (webhookResult) {writeLog("Something happened, API result below: ","Discord API");console.error(webhookResult)} })
+			postToDiscordViaWebhook(outgoingEmbeds.slice(counter,counter+10), webhookResult => { 
+				//if (webhookResult) {writeLog("Something happened, API result below: ","Discord API");console.error(webhookResult)}
+			})
 		}
 	} else {
 		writeLog("you should never see this message","Discord API")	
