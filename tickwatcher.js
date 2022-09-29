@@ -112,7 +112,7 @@ function loadCachedTickTime(webhookId) {
 		writeLog("Loaded cache ok","Cache")
 	} catch(error) {
 		writeLog("Couldn't load cache. Assuming doesn't exist & making a new one.\n\t"+error,"Cache")
-		saveCachedTickTime(webhookId,[])
+		saveCachedTickTime(webhookId,0)
 	}
 	return cacheData
 }
@@ -130,37 +130,29 @@ retrieveApiResultFromEliteBgsApp(tickDataUrl, apiResult => {
 
 	apiResult=JSON.parse(apiResult)
 	console.log(apiResult)
-	sendEmbed=false
 
-	currentTime = new Date().toISOString();
-	console.log(currentTime)
-	timestamp = parseInt( currentTime.split( /-(.+)/, 2 )[ 0 ] ) + 1286 + '-' + currentTime.split( /-(.+)/, 2 )[ 1 ];
-	console.log(timestamp)
+	tickTime = new Date(apiResult[0]["time"])
+	lastTick = new Date(loadCachedTickTime(webhookId))
 
-	tickTime = new Date(apiResult[0]["time"]).toISOString();
-	console.log(tickTime)
-	ticktimestamp = parseInt( tickTime.split( /-(.+)/, 2 )[ 0 ] ) + 1286 + '-' + tickTime.split( /-(.+)/, 2 )[ 1 ];
-	console.log(ticktimestamp)
-
-	lastTick = loadCachedTickTime(webhookId)
-	differenceInMinutes = Math.floor( parseInt( new Date(timestamp) - new Date(ticktimestamp) ) / (1000 * 60) )
-	if ( differenceInMinutes > 1440 ) {
-		differenceInMinutes = differenceInMinutes - 1440
+	if ( ( lastTick - tickTime ) != 0 ) {
+		console.log(lastTick - tickTime)
+		writeLog("new tick was detected. writing cache & sending the embed.")
+		saveCachedTickTime(webhookId,tickTime)
+	} else {
+		writeLog("tick time matched what we have on hand. bailing.")
+		process.exit(0)
 	}
 
+	tickTimeString = tickTime.toString().split(" ")
+	console.log(tickTimeString)
 
-	saveCachedTickTime(webhookId,ticktimestamp)
-	if ( lastTick != ticktimestamp ) {
-		sendEmbed=true
-	}
 	const newEmbedToSend = {
-		title: "**Galaxy tick detected!**",
-		timestamp,
-		description: "*[ inexplicable message ]*\n\nyou ... probably shouldn't be seeing this. contact rglx and let her know.",
+		title: "Galaxy tick detected <t:"+Math.floor(tickTime.getTime() / 1000)+":R>",
+		timestamp: parseInt( tickTime.toISOString().split( /-(.+)/, 2 )[ 0 ] ) + 1286 + '-' + tickTime.toISOString().split( /-(.+)/, 2 )[ 1 ],
+		description: "Occurred at "+ tickTimeString[4] + " (Game-time)" 
 	}
-	newEmbedToSend["description"] = "**__Occurred at:__**\n "+new Date(ticktimestamp)+"\n\n*(<t:"+Math.floor(tickTime.getTime() / 1000)+":R>)*"
-	if (sendEmbed) {
-		console.log(newEmbedToSend)
-		postToDiscordViaWebhook([newEmbedToSend], webhookResult => { if (webhookResult) {writeLog("Something happened, API result below: ","Discord API");console.error(webhookResult)} })
-	}
+	console.log(newEmbedToSend)
+	postToDiscordViaWebhook([newEmbedToSend], webhookResult => { 
+		//if (webhookResult) {writeLog("Something happened, API result below: ","Discord API");console.error(webhookResult)}
+	})
 })
